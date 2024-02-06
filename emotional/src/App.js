@@ -44,15 +44,15 @@ const WebcamApp = () => {
     frame = tf.image.resizeBilinear(frame, [96, 96]);
     var prediction = model.predict(tf.expandDims(frame, 0));
     var predictionArray = Array.from(prediction.dataSync());
-    console.log(predictionArray)
-    if (predictionArray.some(value => value > 0.4)) {
-      var predictedEmoji = predictionToEmoji(predictionArray);
-      setCurrentEmoji(predictedEmoji)
-      emojisplosion({ emojis: [predictedEmoji], count: 1, fontSize: ([96, 98]), position: {x: 1, y: 1}});
-      return predictedEmoji;    
-    } else {
-      return null;
-    }
+    console.log(predictionArray) // For debugging purposes.
+    var predictedEmoji = predictionToEmoji(predictionArray);
+    setCurrentEmoji(predictedEmoji)
+
+    if (predictionArray.some(prediction => prediction > 0.6)) {
+      emojisplosion({ emojis: [predictedEmoji], count: 1, position: {x: 1, y: 1}});
+    } 
+
+    return null
 
   };
 
