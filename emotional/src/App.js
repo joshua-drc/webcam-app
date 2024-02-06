@@ -31,7 +31,7 @@ const WebcamApp = () => {
 
   // Load model.
   const loadModel = async () => {
-modelRef.current = await tf.loadLayersModel('model/model.json');
+    modelRef.current = await tf.loadLayersModel(process.env.PUBLIC_URL + "/model/model.json");
   };
 
   // Run frame through model.
@@ -45,10 +45,15 @@ modelRef.current = await tf.loadLayersModel('model/model.json');
     var prediction = model.predict(tf.expandDims(frame, 0));
     var predictionArray = Array.from(prediction.dataSync());
     console.log(predictionArray)
-    var predictedEmoji = predictionToEmoji(predictionArray);
-    setCurrentEmoji(predictedEmoji)
-    emojisplosion({ emojis: [predictedEmoji], count: 1, fontSize: ([96, 98]), position: {x: 1, y: 1}});
-    return predictedEmoji;    
+    if (predictionArray.some(value => value > 0.4)) {
+      var predictedEmoji = predictionToEmoji(predictionArray);
+      setCurrentEmoji(predictedEmoji)
+      emojisplosion({ emojis: [predictedEmoji], count: 1, fontSize: ([96, 98]), position: {x: 1, y: 1}});
+      return predictedEmoji;    
+    } else {
+      return null;
+    }
+
   };
 
   useEffect(() => {
@@ -68,9 +73,10 @@ modelRef.current = await tf.loadLayersModel('model/model.json');
   // Return video component.
   return (
     <div style={{position: "relative", width: "100vw", height: "100vh"}}>
-      <div style={{border: '2px solid #FFF', position: 'absolute', width: '25%', height: '25%', top: '50%', left: '50%', transform: 'translate(-50%, -50%)'}}></div>
       <span style={{position: "absolute",top: 10,left: 10,fontSize: '10rem'}}>{currentEmoji}</span>
-      <video ref={videoRef} preload="none" style={{ position: "fixed",  right: 0,  bottom: 0,  minWidth: "70%",  minHeight: "70%", borderRadius: "30px", top: "50%", left: "50%", transform: "translate(-50%, -50%)" }}/>
+      <video ref={videoRef} preload="none" style={{ position: "fixed",  right: 0,  bottom: 0,  minWidth: "70%",  maxWidth: "70%", minHeight: "70%", borderRadius: "30px", top: "50%", left: "50%", transform: "translate(-50%, -50%)" }}/>
+      <div style={{ position: "fixed", bottom: 0, width: "100%", backgroundColor: "blue", color: "white", textAlign: "center", padding: "5px" }}> <p><b>Warning</b> This website is for demonstration purposes in AIPI 540 only, may be updated frequently, and the vision model may not work as expected.</p> <p><b>Tip</b> For best results, try to fill the center 50% of the frame with your face!</p>
+      </div>
     </div>
   );
 };
